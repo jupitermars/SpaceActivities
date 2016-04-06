@@ -1,16 +1,6 @@
-boil.Play = function(){};
-var ship;
-var cursors;
-var enemy;
-var fireButton;
-var bullet;
-var bulletImage;
-var shotTime =0;
-var enemyshottime = 0;
-var enemysalive =1;
-var enemybullet;
-var lives;
-boil.Play.prototype = {
+boil.Level4 = function(){};
+
+boil.Level4.prototype = {
     preload: function(){
      game.load.image('ship','Assets/Backgrounds/heroship1.png');
      game.load.image('background','Assets/Backgrounds/background1.png');
@@ -18,12 +8,12 @@ boil.Play.prototype = {
      bulletImage =game.load.image('bullets','Assets/Sprites/space bullet 2 (3).png');
     },
     create: function(){
-        console.log('level1');
-        lives=5101100;
+        console.log('Level4');
+        lives=30;
          game.physics.startSystem(Phaser.Physics.ARCADE);
          game.add.tileSprite(0, 0, 1000, 900, 'background');
          
-        
+        enemysalive = 1;
         enemys = game.add.group();
         enemys.enableBody = true;
         enemys.physicsBodyType = Phaser.Physics.ARCADE;
@@ -39,10 +29,6 @@ boil.Play.prototype = {
                 enemy2.anchor.setTo(0.5, 0.5);
                 enemy2.scale.setTo(.20,.20);
                 enemys.add(enemy2)
-                enemy = game.add.sprite(x * 40 + 30, y * 52 + 20, 'enemy');
-                enemy.anchor.setTo(0.5, 0.5);
-                enemy.scale.setTo(.20,.20);
-                enemys.add(enemy);
                 
             }
         }
@@ -59,7 +45,7 @@ boil.Play.prototype = {
         
     },
     update: function(){
-        if (game.time.now - enemyshottime > 500){
+        if (game.time.now - enemyshottime > 1000){
             this.fireenemybullet();
         }
         if (cursors.left.isDown)
@@ -72,7 +58,7 @@ boil.Play.prototype = {
         }
         if (fireButton.isDown)
         {
-            if (game.time.now - shotTime > 500){
+            if (game.time.now - shotTime > 900){
                 this.fireBullet();
             }
                 
@@ -88,7 +74,7 @@ boil.Play.prototype = {
         console.log('overlap')
         enemysalive--
         if(enemysalive == 0){
-            game.state.start('Level2');
+            game.state.start('Level5');
         }
     },
     fireBullet: function() {
@@ -112,14 +98,14 @@ boil.Play.prototype = {
         var healthyList = enemys.filter(function(child, index, children) {
             return child.alive 
         }, true);
+       
         
-        
-        var number =getRandomInt(0,healthyList.list.length-1);
-        var enemy =healthyList.list[number];
-        enemybullet =game.add.sprite(enemy.x-5,enemy.y+10,'bullets');
+         var number =getRandomInt(0,healthyList.list.length-1);
+        var enemy =healthyList.list[number]
+        enemybullet =game.add.sprite(enemy.position.x-5,enemy.position.y+10,'bullets')
         game.physics.enable(enemybullet, Phaser.Physics.ARCADE);
         enemybullet.body.velocity.y = 1000;
-        enemyshottime =game.time.now;
+        enemyshottime =game.time.now
         
     }
 }
@@ -128,5 +114,5 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 function restartGame(){
-    game.sate.start('Play');
+    game.state.start('Play');
 }

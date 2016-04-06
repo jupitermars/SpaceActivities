@@ -1,12 +1,12 @@
-boil.GameOver = function(){};
+boil.win = function(){};
 
-boil.GameOver.prototype = {
+boil.win.prototype = {
     preload: function(){
 
     },
     create: function(){
-        console.log('You are in the GameOver state');
-        game.stage.backgroundColor = '#0000FF';
+        console.log('You win');
+        game.stage.backgroundColor = '#735';
         game.input.onDown.add(function(){
             changeState('Play');
         }); 
