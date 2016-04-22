@@ -3,33 +3,35 @@ boil.Level4 = function(){};
 boil.Level4.prototype = {
     preload: function(){
      game.load.image('ship','Assets/Backgrounds/heroship1.png');
-     game.load.image('background','Assets/Backgrounds/background1.png');
-     game.load.image('enemy','Assets/Sprites/enemy 1.png');
-     bulletImage =game.load.image('bullets','Assets/Sprites/space bullet 2 (3).png');
+     game.load.image('background','Assets/Backgrounds/jupitar.png');
+     game.load.spritesheet('enemy','Assets/Sprites/Alien 4.png',32,32);
+     bulletImage =game.load.image('bullets','Assets/Sprites/Space bullet 6 ( alien 2 ).png');
     },
     create: function(){
         console.log('Level4');
-        lives=30;
+        lives=4;
          game.physics.startSystem(Phaser.Physics.ARCADE);
-         game.add.tileSprite(0, 0, 1000, 900, 'background');
-         
-        enemysalive = 1;
+         var bg =game.add.sprite(0, 0, 'background');
+         bg.scale.setTo(2.5,2);
+        enemysalive = 40;
         enemys = game.add.group();
         enemys.enableBody = true;
         enemys.physicsBodyType = Phaser.Physics.ARCADE;
+        game.add.tween(enemys).to( { x: 250 }, 3500, Phaser.Easing.Linear.None, true, 0, 1000, true);
+
         
         
-        
-        for (var y = 0; y < 1; y++)
+        for (var y = 0; y < 3; y++)
         {
-            for (var x = 0; x < 1; x++)
+            for (var x = 0; x < 10; x++)
             {
                 
                 var enemy2 = game.add.sprite(x * 40 + 30, y * 52 + 20, 'enemy');
                 enemy2.anchor.setTo(0.5, 0.5);
-                enemy2.scale.setTo(.20,.20);
+                enemy2.scale.setTo(2,2);
                 enemys.add(enemy2)
-                
+                enemys.callAll('animations.add', 'animations', 'spin', [0, 1, 2, 3], 10, true);
+                enemys.callAll('animations.play', 'animations', 'spin');
             }
         }
         
@@ -50,11 +52,11 @@ boil.Level4.prototype = {
         }
         if (cursors.left.isDown)
         {
-            ship.body.velocity.x = -850;
+            ship.body.velocity.x = -750;
         }
         else if (cursors.right.isDown)
         {
-            ship.body.velocity.x = 850;
+            ship.body.velocity.x = 750;
         }
         if (fireButton.isDown)
         {
@@ -73,9 +75,10 @@ boil.Level4.prototype = {
         bullet.kill();
         console.log('overlap')
         enemysalive--
-        if(enemysalive == 0){
-            game.state.start('Level5');
-        }
+        var healthyList = enemys.filter(function(child) {
+            return child.alive 
+        });
+        if(healthyList.list.length <= 0){changeState('Level5')};
     },
     fireBullet: function() {
          bullet =game.add.sprite(ship.position.x - 5,ship.position.y -61 ,'bullets')
@@ -87,7 +90,7 @@ boil.Level4.prototype = {
     enemyHitsship : function(enemybullet,ship){
         enemybullet.kill();
         lives =lives-1
-        if(lives ==0){
+        if(lives <=0){
              changeState('GameOver')
              restartGame();
         }
@@ -95,6 +98,7 @@ boil.Level4.prototype = {
         
     },
     fireenemybullet: function(){
+        bullet =game.add.sprite(enemys.position.x - 5,enemys.position.y -61 ,'bullets')
         var healthyList = enemys.filter(function(child, index, children) {
             return child.alive 
         }, true);

@@ -8,4 +8,4 @@ game.state.add('Level4', boil.Level4);
 game.state.add('Level5', boil.Level5);
 game.state.add('win', boil.win);
 game.state.add('GameOver', boil.GameOver);
-game.state.start('Play'); 
+game.state.start('Level5'); 

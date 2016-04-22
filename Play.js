@@ -1,5 +1,6 @@
 boil.Play = function(){};
 var ship;
+var time;
 var cursors;
 var enemy;
 var fireButton;
@@ -7,43 +8,42 @@ var bullet;
 var bulletImage;
 var shotTime =0;
 var enemyshottime = 0;
-var enemysalive =1;
+var enemysalive;
 var enemybullet;
 var lives;
 boil.Play.prototype = {
     preload: function(){
      game.load.image('ship','Assets/Backgrounds/heroship1.png');
-     game.load.image('background','Assets/Backgrounds/background1.png');
-     game.load.image('enemy','Assets/Sprites/enemy 1.png');
-     bulletImage =game.load.image('bullets','Assets/Sprites/space bullet 2 (3).png');
+     game.load.image('background','Assets/Backgrounds/jupitar.png');
+     game.load.spritesheet('enemy','Assets/Sprites/Alien 4.png',32,32);
+     bulletImage =game.load.image('bullets','Assets/Sprites/Space bullet 6 ( alien 2 ).png');
     },
     create: function(){
         console.log('level1');
-        lives=5101100;
+        time = 0;
+        lives=5;
          game.physics.startSystem(Phaser.Physics.ARCADE);
-         game.add.tileSprite(0, 0, 1000, 900, 'background');
-         
-        
-        enemys = game.add.group();
+         var bg =game.add.sprite(0, 0, 'background');
+         bg.scale.setTo(2.5,2);
+         enemys = game.add.group();
         enemys.enableBody = true;
         enemys.physicsBodyType = Phaser.Physics.ARCADE;
+        game.add.tween(enemys).to( { x: 250 }, 3500, Phaser.Easing.Linear.None, true, 0, 1000, true);
+
         
         
-        
-        for (var y = 0; y < 1; y++)
+        for (var y = 0; y < 3; y++)
         {
-            for (var x = 0; x < 1; x++)
+            for (var x = 0; x < 10; x++)
             {
                 
-                var enemy2 = game.add.sprite(x * 40 + 30, y * 52 + 20, 'enemy');
-                enemy2.anchor.setTo(0.5, 0.5);
-                enemy2.scale.setTo(.20,.20);
-                enemys.add(enemy2)
+
                 enemy = game.add.sprite(x * 40 + 30, y * 52 + 20, 'enemy');
                 enemy.anchor.setTo(0.5, 0.5);
-                enemy.scale.setTo(.20,.20);
+                enemy.scale.setTo(2.5,2.5);
                 enemys.add(enemy);
-                
+                enemys.callAll('animations.add', 'animations', 'spin', [0, 1, 2, 3], 10, true);
+                enemys.callAll('animations.play', 'animations', 'spin');
             }
         }
         
@@ -59,16 +59,16 @@ boil.Play.prototype = {
         
     },
     update: function(){
-        if (game.time.now - enemyshottime > 500){
+        if (game.time.now - enemyshottime > 1000){
             this.fireenemybullet();
         }
         if (cursors.left.isDown)
         {
-            ship.body.velocity.x = -850;
+            ship.body.velocity.x = -750;
         }
         else if (cursors.right.isDown)
         {
-            ship.body.velocity.x = 850;
+            ship.body.velocity.x = 750;
         }
         if (fireButton.isDown)
         {
@@ -86,10 +86,11 @@ boil.Play.prototype = {
         enemy.kill();
         bullet.kill();
         console.log('overlap')
-        enemysalive--
-        if(enemysalive == 0){
-            game.state.start('Level2');
-        }
+        var healthyList = enemys.filter(function(child) {
+            return child.alive 
+        });
+        if(healthyList.list.length <= 0){changeState('Level2')};
+        
     },
     fireBullet: function() {
          bullet =game.add.sprite(ship.position.x - 5,ship.position.y -61 ,'bullets')
@@ -101,7 +102,7 @@ boil.Play.prototype = {
     enemyHitsship : function(enemybullet,ship){
         enemybullet.kill();
         lives =lives-1
-        if(lives ==0){
+        if(lives <=0){
              changeState('GameOver')
              restartGame();
         }
@@ -109,24 +110,37 @@ boil.Play.prototype = {
         
     },
     fireenemybullet: function(){
-        var healthyList = enemys.filter(function(child, index, children) {
+    
+        
+        var healthyList = enemys.filter(function(child) {
             return child.alive 
-        }, true);
+        });
+        if(healthyList.list.length <= 0){return};
+        console.log(healthyList)
         
-        
-        var number =getRandomInt(0,healthyList.list.length-1);
-        var enemy =healthyList.list[number];
-        enemybullet =game.add.sprite(enemy.x-5,enemy.y+10,'bullets');
+        var number =getRandomInt(0,healthyList.list.length-1);       
+        var shootingEnemy =healthyList.list[number];
+        enemybullet =game.add.sprite(enemys.position.x+shootingEnemy.position.x-5,shootingEnemy.position.y+10,'bullets');
         game.physics.enable(enemybullet, Phaser.Physics.ARCADE);
-        enemybullet.body.velocity.y = 1000;
+        enemybullet.body.velocity.y =1000;
         enemyshottime =game.time.now;
         
-    }
+    },
+   
+    
+    
 }
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 function restartGame(){
-    game.sate.start('Play');
+    game.state.start('Play');
 }
+
+window.setInterval(increaseTime,1000);
+
+function increaseTime(){
+time++;
+
+};

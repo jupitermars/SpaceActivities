@@ -1,37 +1,28 @@
 boil.Level5 = function(){};
-
+var boss;
+var bullet;
+var bossHealth = 90;
+var score
 boil.Level5.prototype = {
     preload: function(){
      game.load.image('ship','Assets/Backgrounds/heroship1.png');
-     game.load.image('background','Assets/Backgrounds/background1.png');
-     game.load.image('enemy','Assets/Sprites/enemy 1.png');
-     bulletImage =game.load.image('bullets','Assets/Sprites/space bullet 2 (3).png');
+     game.load.image('background','Assets/Backgrounds/jupitar.png');
+        game.load.spritesheet('boss','Assets/Sprites/Space Boss 1.png',50,50);
+     bulletImage =game.load.image('bullets','Assets/Sprites/space bullet 3.png');
     },
     create: function(){
-        console.log('Level5');
-        lives=30;
-         game.physics.startSystem(Phaser.Physics.ARCADE);
-         game.add.tileSprite(0, 0, 1000, 900, 'background');
-         
-        enemysalive = 1;
-        enemys = game.add.group();
-        enemys.enableBody = true;
-        enemys.physicsBodyType = Phaser.Physics.ARCADE;
-        
-        
-        
-        for (var y = 0; y < 1; y++)
-        {
-            for (var x = 0; x < 1; x++)
-            {
-                
-                var enemy2 = game.add.sprite(x * 40 + 30, y * 52 + 20, 'enemy');
-                enemy2.anchor.setTo(0.5, 0.5);
-                enemy2.scale.setTo(.20,.20);
-                enemys.add(enemy2)
-                
-            }
-        }
+        lives =4;
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        var bg =game.add.sprite(0, 0, 'background');
+         bg.scale.setTo(2.5,2);
+        boss = game.add.sprite(150,50,'boss');
+        boss.enableBody = true;
+        game.physics.enable(boss, Phaser.Physics.ARCADE);
+        game.add.tween(boss).to( { x: 500 }, 1500, Phaser.Easing.Linear.None, true, 0, 1000, true);
+        boss.scale.setTo(2,2)
+        boss.animations.add('swirl',[0,1,2,3,4]);
+        boss.animations.play('swirl',15,true);
         
         ship = game.add.sprite(1000,800, 'ship');
         ship.scale.setTo(.45,.45);
@@ -50,11 +41,11 @@ boil.Level5.prototype = {
         }
         if (cursors.left.isDown)
         {
-            ship.body.velocity.x = -850;
+            ship.body.velocity.x = -750;
         }
         else if (cursors.right.isDown)
         {
-            ship.body.velocity.x = 850;
+            ship.body.velocity.x = 750;
         }
         if (fireButton.isDown)
         {
@@ -63,56 +54,48 @@ boil.Level5.prototype = {
             }
                 
         }
-        game.physics.arcade.overlap(bullet,enemys,this.overlaphandler);
-        game.physics.arcade.overlap(enemybullet,ship,this.enemyHitsship);
-    
-    
-    },
-    overlaphandler : function(bullet,enemy){
-        enemy.kill();
-        bullet.kill();
-        console.log('overlap')
-        enemysalive--
-        if(enemysalive == 0){
-            console.log('you win');
-        }
+                game.physics.arcade.overlap(bullet,boss,this.damageBoss);
+                game.physics.arcade.overlap(enemybullet,ship,this.enemyHitsship);
     },
     fireBullet: function() {
-         bullet =game.add.sprite(ship.position.x - 5,ship.position.y -61 ,'bullets')
+        bullet =game.add.sprite(ship.position.x - 5,ship.position.y -61 ,'bullets')
         game.physics.enable(bullet, Phaser.Physics.ARCADE);
         bullet.body.velocity.y = -1000;
-         shotTime =game.time.now
-         
+        shotTime = game.time.now;   
     },
-    enemyHitsship : function(enemybullet,ship){
+    damageBoss: function(){
+        bossHealth--;
+        if (bossHealth <= 0) {
+            boss.kill();
+            game.state.start('win');
+        }
+        console.log('bossdam');
+    },
+    fireenemybullet: function(){
+        if(bossHealth <=0 ){
+            return false
+        }
+        enemybullet =game.add.sprite(boss.position.x +50,boss.position.y +50 ,'bullets')
+        game.physics.enable(enemybullet, Phaser.Physics.ARCADE);
+        enemybullet.body.velocity.y = 1000;
+        enemyshottime =game.time.now
+        
+    },
+    enemyHitsship : function(enemybullet){
         enemybullet.kill();
         lives =lives-1
-        if(lives ==0){
+        if(lives <= 0){
              changeState('GameOver')
              restartGame();
         }
         console.log('hitsship')
         
     },
-    fireenemybullet: function(){
-        var healthyList = enemys.filter(function(child, index, children) {
-            return child.alive 
-        }, true);
-       
+            
+    
         
-         var number =getRandomInt(0,healthyList.list.length-1);
-        var enemy =healthyList.list[number]
-        enemybullet =game.add.sprite(enemy.position.x-5,enemy.position.y+10,'bullets')
-        game.physics.enable(enemybullet, Phaser.Physics.ARCADE);
-        enemybullet.body.velocity.y = 1000;
-        enemyshottime =game.time.now
         
-    }
-}
+        
+    
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-function restartGame(){
-    game.state.start('Play');
 }

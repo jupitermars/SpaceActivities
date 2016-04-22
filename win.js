@@ -6,10 +6,13 @@ boil.win.prototype = {
     },
     create: function(){
         console.log('You win');
-        game.stage.backgroundColor = '#735';
+        game.stage.backgroundColor = '#780';
         game.input.onDown.add(function(){
             changeState('Play');
         }); 
+    console.log('score ' + time)
+    
+    
     },
     update: function(){
         
